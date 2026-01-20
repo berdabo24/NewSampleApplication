@@ -1,0 +1,24 @@
+{
+  "version": 2,
+  "dgSpecHash": "FwCm0lr6p9c=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Julian\\Downloads\\MicrosoftAgent-BlazorUI-SampleApplication-main\\MicrosoftAgent-BlazorUI-SampleApplication-main\\BlazorApp2\\BlazorApp2.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Julian\\.nuget\\packages\\azure.ai.openai\\2.5.0-beta.1\\azure.ai.openai.2.5.0-beta.1.nupkg.sha512",
+    "C:\\Users\\Julian\\.nuget\\packages\\azure.core\\1.49.0\\azure.core.1.49.0.nupkg.sha512",
+    "C:\\Users\\Julian\\.nuget\\packages\\microsoft.agents.ai\\1.0.0-preview.251114.1\\microsoft.agents.ai.1.0.0-preview.251114.1.nupkg.sha512",
+    "C:\\Users\\Julian\\.nuget\\packages\\microsoft.agents.ai.abstractions\\1.0.0-preview.251114.1\\microsoft.agents.ai.abstractions.1.0.0-preview.251114.1.nupkg.sha512",
+    "C:\\Users\\Julian\\.nuget\\packages\\microsoft.agents.ai.openai\\1.0.0-preview.251114.1\\microsoft.agents.ai.openai.1.0.0-preview.251114.1.nupkg.sha512",
+    "C:\\Users\\Julian\\.nuget\\packages\\microsoft.aspnetcore.app.internal.assets\\10.0.1\\microsoft.aspnetcore.app.internal.assets.10.0.1.nupkg.sha512",
+    "C:\\Users\\Julian\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\8.0.0\\microsoft.bcl.asyncinterfaces.8.0.0.nupkg.sha512",
+    "C:\\Users\\Julian\\.nuget\\packages\\microsoft.extensions.ai\\10.0.0\\microsoft.extensions.ai.10.0.0.nupkg.sha512",
+    "C:\\Users\\Julian\\.nuget\\packages\\microsoft.extensions.ai.abstractions\\10.0.0\\microsoft.extensions.ai.abstractions.10.0.0.nupkg.sha512",
+    "C:\\Users\\Julian\\.nuget\\packages\\microsoft.extensions.ai.openai\\10.0.0-preview.1.25559.3\\microsoft.extensions.ai.openai.10.0.0-preview.1.25559.3.nupkg.sha512",
+    "C:\\Users\\Julian\\.nuget\\packages\\microsoft.extensions.vectordata.abstractions\\9.7.0\\microsoft.extensions.vectordata.abstractions.9.7.0.nupkg.sha512",
+    "C:\\Users\\Julian\\.nuget\\packages\\openai\\2.6.0\\openai.2.6.0.nupkg.sha512",
+    "C:\\Users\\Julian\\.nuget\\packages\\system.clientmodel\\1.8.0\\system.clientmodel.1.8.0.nupkg.sha512",
+    "C:\\Users\\Julian\\.nuget\\packages\\system.memory.data\\10.0.0\\system.memory.data.10.0.0.nupkg.sha512",
+    "C:\\Users\\Julian\\.nuget\\packages\\system.numerics.tensors\\10.0.0\\system.numerics.tensors.10.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}

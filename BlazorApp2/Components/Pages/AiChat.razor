@@ -1,0 +1,174 @@
+﻿@page "/ai"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Components.Web
+@inject BlazorApp2.Services.AiService Ai
+
+<PageTitle>AI Chat</PageTitle>
+
+<div class="container-fluid p-4">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <div>
+            <h3 class="mb-0">AI Chat</h3>
+            <div class="text-muted">Ask anything. This uses our existing AI service.</div>
+        </div>
+        <button class="btn btn-outline-secondary" @onclick="ClearChat" disabled="@(isLoading || messages.Count == 0)">
+            Clear
+        </button>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <!-- Chat window -->
+            <div class="chat-window border rounded p-3 mb-3 bg-light">
+                @if (messages.Count == 0)
+                {
+                    <div class="text-muted">
+                        Try:
+                        <ul class="mb-0">
+                            <li>Explain what is polymorphism in C# with a short example.</li>
+                            <li>Rewrite this paragraph to be more human.</li>
+                            <li>Give me 5 quiz questions about if-else and switch.</li>
+                        </ul>
+                    </div>
+                }
+                else
+                {
+                    @foreach (var msg in messages)
+                    {
+                        <div class="d-flex mb-3 @(msg.Role == "user" ? "justify-content-end" : "justify-content-start")">
+                            <div class="chat-bubble @(msg.Role == "user" ? "bubble-user" : "bubble-ai")">
+                                <div class="small text-muted mb-1">
+                                    @(msg.Role == "user" ? "You" : "AI")
+                                </div>
+                                <div style="white-space: pre-wrap;">@msg.Text</div>
+                            </div>
+                        </div>
+                    }
+
+                    @if (isLoading)
+                    {
+                        <div class="d-flex mb-3 justify-content-start">
+                            <div class="chat-bubble bubble-ai">
+                                <div class="small text-muted mb-1">AI</div>
+                                <div>Thinking…</div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+
+            <!-- Input (EditForm must have Model) -->
+            <EditForm Model="@chatInput">
+                <div class="mb-2">
+                    <label class="form-label mb-1">Message</label>
+                    <textarea class="form-control"
+                              rows="3"
+                              placeholder="Type your question here..."
+                              @bind="chatInput.Prompt"
+                              @bind:event="oninput"
+                              @onkeydown="HandleKeyDown"></textarea>
+                    <div class="form-text">
+                        Tip: Press <b>Ctrl + Enter</b> to send. Use <b>Shift + Enter</b> for new line.
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-primary"
+                            @onclick="Ask"
+                            disabled="@(!CanSend)">
+                        @(isLoading ? "Thinking..." : "Send")
+                    </button>
+
+                    <button type="button" class="btn btn-outline-secondary" @onclick="UseExample" disabled="@(isLoading)">
+                        Use Example
+                    </button>
+                </div>
+            </EditForm>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    .chat-window {
+        height: 420px;
+        overflow-y: auto;
+    }
+
+    .chat-bubble {
+        max-width: 75%;
+        padding: 12px 14px;
+        border-radius: 14px;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+        background: white;
+        border: 1px solid rgba(0,0,0,0.08);
+    }
+
+    .bubble-user {
+        border: 1px solid rgba(0,0,0,0.15);
+    }
+</style>
+
+@code {
+    private bool isLoading = false;
+
+    private readonly List<ChatMsg> messages = new();
+    private ChatInput chatInput = new();
+
+    private bool CanSend => !isLoading && !string.IsNullOrWhiteSpace(chatInput.Prompt);
+
+    private async Task Ask()
+    {
+        if (isLoading) return;
+
+        var userText = chatInput.Prompt?.Trim();
+        if (string.IsNullOrWhiteSpace(userText)) return;
+
+        isLoading = true;
+
+        // Add user message
+        messages.Add(new ChatMsg("user", userText));
+        chatInput.Prompt = "";
+
+        try
+        {
+            // Use the user's prompt directly (no sender/receiver injection on AI page)
+            var aiText = await Ai.AskAsync(userText);
+            messages.Add(new ChatMsg("ai", aiText ?? ""));
+        }
+        catch (Exception ex)
+        {
+            messages.Add(new ChatMsg("ai", $"(Error) {ex.Message}"));
+        }
+
+        isLoading = false;
+    }
+
+    private void ClearChat()
+    {
+        messages.Clear();
+        chatInput.Prompt = "";
+    }
+
+    private void UseExample()
+    {
+        chatInput.Prompt = "Help me draft a polite email to my lecturer requesting an extension for 2 days.";
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        // Ctrl + Enter to send (reliable)
+        if (e.CtrlKey && e.Key == "Enter")
+        {
+            await Ask();
+        }
+    }
+
+    private record ChatMsg(string Role, string Text);
+
+    private class ChatInput
+    {
+        public string Prompt { get; set; } = "";
+    }
+}

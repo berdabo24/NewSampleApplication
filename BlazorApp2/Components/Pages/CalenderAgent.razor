@@ -1,0 +1,221 @@
+﻿@page "/calendar-agent"
+@using System.Globalization
+@using System.Text.RegularExpressions
+@inject BlazorApp2.Services.AiService Ai
+
+<h3>Schedule Assistant (Agentic AI)</h3>
+
+<div class="mb-3">
+    <label class="form-label">What do you want to schedule?</label>
+    <textarea class="form-control" rows="3" @bind="UserRequest"
+              placeholder="E.g., Help me schedule a meeting with my group next week, 1 hour."></textarea>
+</div>
+
+<div class="mb-3">
+    <label class="form-label">Preferred date range (optional)</label>
+    <input class="form-control" @bind="DateRange"
+           placeholder="E.g., 16–20 Dec, afternoon" />
+</div>
+
+<button class="btn btn-primary" @onclick="GenerateOptions" disabled="@IsBusy">
+    @(IsBusy ? "Generating..." : "Suggest 3 Time Options")
+</button>
+
+@if (!string.IsNullOrWhiteSpace(AiRaw))
+{
+    <hr />
+    <h5>AI Planning Output (3 Options)</h5>
+    <pre class="p-3 border rounded bg-light">@AiRaw</pre>
+}
+
+@if (Options.Count > 0)
+{
+    <hr />
+    <h5>Pick one slot</h5>
+
+    <div class="row g-3">
+        @foreach (var opt in Options)
+        {
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h6 class="card-title">@opt.Label</h6>
+                        <div><b>Title:</b> @opt.Title</div>
+                        <div><b>Start:</b> @opt.StartLocal.ToString("yyyy-MM-dd HH:mm")</div>
+                        <div><b>End:</b> @opt.EndLocal.ToString("yyyy-MM-dd HH:mm")</div>
+                        @if (!string.IsNullOrWhiteSpace(opt.Location))
+                        {
+                            <div><b>Location:</b> @opt.Location</div>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(opt.Description))
+                        {
+                            <div class="mt-2"><b>Notes:</b> @opt.Description</div>
+                        }
+                    </div>
+                    <div class="card-footer bg-transparent border-0 pb-3">
+                        <a class="btn btn-success w-100" href="@opt.GoogleUrl" target="_blank">
+                            Add Option to Google Calendar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private string UserRequest = "";
+    private string DateRange = "";
+    private bool IsBusy = false;
+
+    private string AiRaw = "";
+    private List<EventOption> Options = new();
+
+    private async Task GenerateOptions()
+    {
+        IsBusy = true;
+        AiRaw = "";
+        Options.Clear();
+
+        // Agentic prompt: always propose 3 options.
+        // If user gave exact date/time, Option 1 should match it; Options 2/3 are reasonable alternatives.
+        var prompt = $@"
+You are a scheduling agent.
+
+Task:
+- Propose THREE possible time options for ONE meeting/event based on the user's request.
+- If the user provided an exact date/time, Option 1 MUST match that exact time.
+- If time is not provided, suggest 3 realistic time slots.
+- Keep all options within the user's preferred date range if provided.
+- Use local time.
+
+Return ONLY in this exact format (labels and order must match):
+
+Option 1
+Title: ...
+Start (local): YYYY-MM-DD HH:MM
+End (local): YYYY-MM-DD HH:MM
+Location: ...
+Description: ...
+
+Option 2
+Title: ...
+Start (local): YYYY-MM-DD HH:MM
+End (local): YYYY-MM-DD HH:MM
+Location: ...
+Description: ...
+
+Option 3
+Title: ...
+Start (local): YYYY-MM-DD HH:MM
+End (local): YYYY-MM-DD HH:MM
+Location: ...
+Description: ...
+
+User request: {UserRequest}
+Preferred date range (optional): {DateRange}
+";
+
+        AiRaw = await Ai.AskAsync(prompt);
+
+        var parsed = ParseThreeOptions(AiRaw);
+        if (parsed.Count > 0)
+        {
+            // build Google Calendar URL for each option
+            foreach (var o in parsed)
+            {
+                o.GoogleUrl = BuildGoogleCalendarUrl(o);
+            }
+            Options = parsed;
+        }
+
+        IsBusy = false;
+    }
+
+    // ===== Parsing =====
+
+    private static List<EventOption> ParseThreeOptions(string text)
+    {
+        var results = new List<EventOption>();
+
+        // Split into blocks starting with "Option 1", "Option 2", "Option 3"
+        var blocks = Regex.Split(text.Trim(), @"(?im)^\s*(Option\s+[123])\s*$")
+                          .Where(s => !string.IsNullOrWhiteSpace(s))
+                          .ToList();
+
+        // After split, format is typically: [ "Option 1", "block1", "Option 2", "block2", ... ]
+        for (int i = 0; i + 1 < blocks.Count; i += 2)
+        {
+            var label = blocks[i].Trim();
+            var body = blocks[i + 1];
+
+            var title = ExtractLine(body, "Title:");
+            var startStr = ExtractLine(body, "Start (local):");
+            var endStr = ExtractLine(body, "End (local):");
+            var location = ExtractLine(body, "Location:");
+            var desc = ExtractLine(body, "Description:");
+
+            if (string.IsNullOrWhiteSpace(title) ||
+                string.IsNullOrWhiteSpace(startStr) ||
+                string.IsNullOrWhiteSpace(endStr))
+                continue;
+
+            if (!DateTime.TryParseExact(startStr.Trim(), "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture,
+                    DateTimeStyles.None, out var startLocal))
+                continue;
+
+            if (!DateTime.TryParseExact(endStr.Trim(), "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture,
+                    DateTimeStyles.None, out var endLocal))
+                continue;
+
+            if (endLocal <= startLocal)
+                endLocal = startLocal.AddHours(1);
+
+            results.Add(new EventOption
+            {
+                Label = label,
+                Title = title.Trim(),
+                StartLocal = startLocal,
+                EndLocal = endLocal,
+                Location = (location ?? "").Trim(),
+                Description = (desc ?? "").Trim()
+            });
+        }
+
+        // If AI returned weird formatting, at least return what we can
+        return results;
+    }
+
+    private static string ExtractLine(string text, string label)
+    {
+        var match = Regex.Match(text, @"(?im)^\s*" + Regex.Escape(label) + @"\s*(.+)$");
+        return match.Success ? match.Groups[1].Value : "";
+    }
+
+    // ===== Google Calendar URL builder =====
+
+    private static string BuildGoogleCalendarUrl(EventOption evt)
+    {
+        // Convert local -> UTC for Google dates
+        var startUtc = evt.StartLocal.ToUniversalTime();
+        var endUtc = evt.EndLocal.ToUniversalTime();
+        var dates = $"{startUtc:yyyyMMdd'T'HHmmss'Z'}/{endUtc:yyyyMMdd'T'HHmmss'Z'}";
+
+        string text = Uri.EscapeDataString(evt.Title);
+        string details = Uri.EscapeDataString(evt.Description);
+        string location = Uri.EscapeDataString(evt.Location);
+
+        return $"https://calendar.google.com/calendar/render?action=TEMPLATE&text={text}&dates={dates}&details={details}&location={location}";
+    }
+
+    private class EventOption
+    {
+        public string Label { get; set; } = "";
+        public string Title { get; set; } = "";
+        public DateTime StartLocal { get; set; }
+        public DateTime EndLocal { get; set; }
+        public string Location { get; set; } = "";
+        public string Description { get; set; } = "";
+        public string GoogleUrl { get; set; } = "";
+    }
+}

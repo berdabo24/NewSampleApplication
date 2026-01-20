@@ -1,0 +1,88 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\Julian\\Downloads\\MicrosoftAgent-BlazorUI-SampleApplication-main\\MicrosoftAgent-BlazorUI-SampleApplication-main\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{E279D6BD-F9A1-3B83-2DE9-C1F46BEE0E76}|BlazorApp2\\BlazorApp2.csproj|c:\\users\\julian\\downloads\\microsoftagent-blazorui-sampleapplication-main\\microsoftagent-blazorui-sampleapplication-main\\blazorapp2\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{E279D6BD-F9A1-3B83-2DE9-C1F46BEE0E76}|BlazorApp2\\BlazorApp2.csproj|solutionrelative:blazorapp2\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E279D6BD-F9A1-3B83-2DE9-C1F46BEE0E76}|BlazorApp2\\BlazorApp2.csproj|c:\\users\\julian\\downloads\\microsoftagent-blazorui-sampleapplication-main\\microsoftagent-blazorui-sampleapplication-main\\blazorapp2\\services\\aiproviderconfig.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E279D6BD-F9A1-3B83-2DE9-C1F46BEE0E76}|BlazorApp2\\BlazorApp2.csproj|solutionrelative:blazorapp2\\services\\aiproviderconfig.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E279D6BD-F9A1-3B83-2DE9-C1F46BEE0E76}|BlazorApp2\\BlazorApp2.csproj|c:\\users\\julian\\downloads\\microsoftagent-blazorui-sampleapplication-main\\microsoftagent-blazorui-sampleapplication-main\\blazorapp2\\services\\aiservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E279D6BD-F9A1-3B83-2DE9-C1F46BEE0E76}|BlazorApp2\\BlazorApp2.csproj|solutionrelative:blazorapp2\\services\\aiservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E279D6BD-F9A1-3B83-2DE9-C1F46BEE0E76}|BlazorApp2\\BlazorApp2.csproj|c:\\users\\julian\\downloads\\microsoftagent-blazorui-sampleapplication-main\\microsoftagent-blazorui-sampleapplication-main\\blazorapp2\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E279D6BD-F9A1-3B83-2DE9-C1F46BEE0E76}|BlazorApp2\\BlazorApp2.csproj|solutionrelative:blazorapp2\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 2,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "AiService.cs",
+              "DocumentMoniker": "C:\\Users\\Julian\\Downloads\\MicrosoftAgent-BlazorUI-SampleApplication-main\\MicrosoftAgent-BlazorUI-SampleApplication-main\\BlazorApp2\\Services\\AiService.cs",
+              "RelativeDocumentMoniker": "BlazorApp2\\Services\\AiService.cs",
+              "ToolTip": "C:\\Users\\Julian\\Downloads\\MicrosoftAgent-BlazorUI-SampleApplication-main\\MicrosoftAgent-BlazorUI-SampleApplication-main\\BlazorApp2\\Services\\AiService.cs",
+              "RelativeToolTip": "BlazorApp2\\Services\\AiService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAArAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-20T20:10:02.764Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "AiProviderConfig.cs",
+              "DocumentMoniker": "C:\\Users\\Julian\\Downloads\\MicrosoftAgent-BlazorUI-SampleApplication-main\\MicrosoftAgent-BlazorUI-SampleApplication-main\\BlazorApp2\\Services\\AiProviderConfig.cs",
+              "RelativeDocumentMoniker": "BlazorApp2\\Services\\AiProviderConfig.cs",
+              "ToolTip": "C:\\Users\\Julian\\Downloads\\MicrosoftAgent-BlazorUI-SampleApplication-main\\MicrosoftAgent-BlazorUI-SampleApplication-main\\BlazorApp2\\Services\\AiProviderConfig.cs",
+              "RelativeToolTip": "BlazorApp2\\Services\\AiProviderConfig.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-20T20:16:23.818Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\Julian\\Downloads\\MicrosoftAgent-BlazorUI-SampleApplication-main\\MicrosoftAgent-BlazorUI-SampleApplication-main\\BlazorApp2\\appsettings.json",
+              "RelativeDocumentMoniker": "BlazorApp2\\appsettings.json",
+              "ToolTip": "C:\\Users\\Julian\\Downloads\\MicrosoftAgent-BlazorUI-SampleApplication-main\\MicrosoftAgent-BlazorUI-SampleApplication-main\\BlazorApp2\\appsettings.json",
+              "RelativeToolTip": "BlazorApp2\\appsettings.json",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAAB8AAAA5AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-12-16T13:40:43.2Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\Julian\\Downloads\\MicrosoftAgent-BlazorUI-SampleApplication-main\\MicrosoftAgent-BlazorUI-SampleApplication-main\\BlazorApp2\\Program.cs",
+              "RelativeDocumentMoniker": "BlazorApp2\\Program.cs",
+              "ToolTip": "C:\\Users\\Julian\\Downloads\\MicrosoftAgent-BlazorUI-SampleApplication-main\\MicrosoftAgent-BlazorUI-SampleApplication-main\\BlazorApp2\\Program.cs",
+              "RelativeToolTip": "BlazorApp2\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-01-20T20:18:24.944Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

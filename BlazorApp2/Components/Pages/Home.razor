@@ -1,0 +1,72 @@
+﻿@page "/"
+
+<PageTitle>Home</PageTitle>
+
+<div class="p-4">
+    <h1 class="mb-1">No Sleep – AI Agentic Sample Application</h1>
+    <p class="text-muted mb-4">
+        A simple demo app showing Agentic AI features using our existing AI service.
+    </p>
+
+    <div class="row g-3">
+        <!-- AI Chat -->
+        <div class="col-12 col-md-6 col-lg-3">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">AI Chat</h5>
+                    <p class="card-text text-muted">
+                        General chat to test prompts and get explanations or drafts.
+                    </p>
+                    <a class="btn btn-primary w-100 mt-auto" href="ai">Open AI Chat</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Goal Counter -->
+        <div class="col-12 col-md-6 col-lg-3">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">Goal Counter (Agentic)</h5>
+                    <p class="card-text text-muted">
+                        Tell the AI your goal. It decides the target, step size, and milestones.
+                    </p>
+                    <a class="btn btn-primary w-100 mt-auto" href="counter">Open Goal Counter</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Schedule Assistant -->
+        <div class="col-12 col-md-6 col-lg-3">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">Schedule Assistant (Agentic)</h5>
+                    <p class="card-text text-muted">
+                        The AI proposes time options and generates a Google Calendar event link.
+                    </p>
+                    <a class="btn btn-primary w-100 mt-auto" href="calendar-agent">Open Schedule Assistant</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Email Assistant -->
+        <div class="col-12 col-md-6 col-lg-3">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">Email Assistant (Agentic)</h5>
+                    <p class="card-text text-muted">
+                        The AI drafts subject + email body, then your app opens the email client to send.
+                    </p>
+                    <a class="btn btn-primary w-100 mt-auto" href="email-agent">Open Email Assistant</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr class="my-4" />
+
+    <div class="alert alert-info mb-0">
+        <b>How this is “Agentic AI”:</b>
+        our AI makes decisions (planning, generating options, drafting content) and our app executes actions
+        (tracking progress, opening Google Calendar event creation, opening email client to send).
+    </div>
+</div>

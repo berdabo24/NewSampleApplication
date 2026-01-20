@@ -1,0 +1,227 @@
+﻿@page "/email-agent"
+@rendermode InteractiveServer
+@using System.Text.RegularExpressions
+@inject BlazorApp2.Services.AiService Ai
+
+<PageTitle>Email Assistant</PageTitle>
+
+<div class="container-fluid p-4">
+    <h3 class="mb-1">Email Assistant (Agentic AI)</h3>
+    <div class="text-muted mb-4">
+        The AI decides the subject + email draft, then your app triggers the send action via email client.
+    </div>
+
+    <div class="card shadow-sm mb-3">
+        <div class="card-body">
+
+            <div class="row g-3">
+                <div class="col-12 col-md-6">
+                    <label class="form-label">To (recipient email)</label>
+                    <input class="form-control" @bind="ToEmail" placeholder="e.g., lecturer@mmu.edu.my" />
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <label class="form-label">Tone</label>
+                    <select class="form-select" @bind="Tone">
+                        <option>Formal</option>
+                        <option>Friendly</option>
+                        <option>Urgent</option>
+                        <option>Apologetic</option>
+                    </select>
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <label class="form-label">Sender name (optional)</label>
+                    <input class="form-control" @bind="SenderName" placeholder="Your name to appear in the email (optional)" />
+                    <div class="form-text">If left empty, the AI will use its default sender placeholder.</div>
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <label class="form-label">Recipient name (optional)</label>
+                    <input class="form-control" @bind="ReceiverName" placeholder="Recipient's name to use in the email (optional)" />
+                    <div class="form-text">If left empty, the AI will use its default recipient placeholder.</div>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label">What is the email about?</label>
+                    <textarea class="form-control" rows="4" @bind="UserRequest"
+                              placeholder="e.g., Ask for 2-day extension for assignment, explain reason briefly, propose new due date."></textarea>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 mt-3">
+                <button class="btn btn-primary" @onclick="GenerateDraft" disabled="@IsBusy">
+                    @(IsBusy ? "Generating..." : "Generate Email Draft")
+                </button>
+
+                <button class="btn btn-outline-secondary" @onclick="UseExample" disabled="@IsBusy">
+                    Use Example
+                </button>
+
+                <button class="btn btn-outline-danger" @onclick="ClearAll" disabled="@IsBusy">
+                    Clear
+                </button>
+            </div>
+        </div>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(AiRaw))
+    {
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="mb-2">AI Draft (Decision Output)</h5>
+
+                <div class="mb-2">
+                    <b>Subject:</b> @DraftSubject
+                </div>
+
+                <div class="mb-3">
+                    <b>Email Body:</b>
+                    <pre class="p-3 border rounded bg-light" style="white-space: pre-wrap;">@DraftBody</pre>
+                </div>
+
+                <div class="d-flex gap-2 flex-wrap">
+                    @if (!string.IsNullOrWhiteSpace(MailtoUrl))
+                    {
+                        <a class="btn btn-success" href="@MailtoUrl">
+                            Open Email App (Send)
+                        </a>
+                    }
+
+                    <button class="btn btn-outline-secondary" @onclick="CopyBody">
+                        Copy Body
+                    </button>
+                </div>
+
+                <hr />
+                <details>
+                    <summary class="text-muted">Show raw AI output</summary>
+                    <pre class="mt-2 p-3 border rounded bg-light" style="white-space: pre-wrap;">@AiRaw</pre>
+                </details>
+
+                @if (!string.IsNullOrWhiteSpace(StatusMsg))
+                {
+                    <div class="alert alert-info mt-3">@StatusMsg</div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private string ToEmail = "";
+    private string Tone = "Formal";
+    private string UserRequest = "";
+
+    // New optional name fields
+    private string SenderName = "";
+    private string ReceiverName = "";
+
+    private bool IsBusy = false;
+
+    private string AiRaw = "";
+    private string DraftSubject = "";
+    private string DraftBody = "";
+    private string MailtoUrl = "";
+    private string StatusMsg = "";
+
+    private async Task GenerateDraft()
+    {
+        IsBusy = true;
+        StatusMsg = "";
+        AiRaw = "";
+        DraftSubject = "";
+        DraftBody = "";
+        MailtoUrl = "";
+
+        var prompt = $@"
+You are an email-writing agent.
+
+Write ONE email draft based on the user's request.
+Use the selected tone.
+Keep it clear, polite, and realistic.
+Return ONLY in this exact format:
+
+Subject: ...
+Body:
+...
+
+Recipient Email: {ToEmail}
+Recipient Name: {ReceiverName}
+Sender Name: {SenderName}
+Tone: {Tone}
+User request: {UserRequest}
+";
+
+        AiRaw = await Ai.AskAsync(prompt);
+
+        // Parse output
+        DraftSubject = ExtractLine(AiRaw, "Subject:");
+        DraftBody = ExtractBody(AiRaw);
+
+        if (string.IsNullOrWhiteSpace(DraftSubject) || string.IsNullOrWhiteSpace(DraftBody))
+        {
+            StatusMsg = "I couldn't parse the draft. Try generating again (or simplify the request).";
+            IsBusy = false;
+            return;
+        }
+
+        // Build mailto link
+        MailtoUrl = BuildMailto(ToEmail, DraftSubject, DraftBody);
+
+        IsBusy = false;
+    }
+
+    private void UseExample()
+    {
+        ToEmail = "lecturer@mmu.edu.my";
+        Tone = "Formal";
+        UserRequest = "Request a 2-day extension for the assignment. Mention I faced a family emergency and I have completed most sections. Propose new due date and thank the lecturer.";
+        SenderName = ""; // keep empty to demonstrate default behavior
+        ReceiverName = "";
+    }
+
+    private void ClearAll()
+    {
+        ToEmail = "";
+        Tone = "Formal";
+        UserRequest = "";
+        SenderName = "";
+        ReceiverName = "";
+        AiRaw = "";
+        DraftSubject = "";
+        DraftBody = "";
+        MailtoUrl = "";
+        StatusMsg = "";
+    }
+
+    private void CopyBody()
+    {
+        // Simple fallback: show message (true clipboard needs JS interop; optional)
+        StatusMsg = "Tip: Select the email body and copy (Ctrl+C). If you want one-click copy, tell me and I’ll add JS clipboard support.";
+    }
+
+    private static string ExtractLine(string text, string label)
+    {
+        var match = Regex.Match(text ?? "", @"(?im)^\s*" + Regex.Escape(label) + @"\s*(.+)$");
+        return match.Success ? match.Groups[1].Value.Trim() : "";
+    }
+
+    private static string ExtractBody(string text)
+    {
+        // Capture everything after "Body:" line
+        var match = Regex.Match(text ?? "", @"(?is)\bBody:\s*(.*)$");
+        return match.Success ? match.Groups[1].Value.Trim() : "";
+    }
+
+    private static string BuildMailto(string to, string subject, string body)
+    {
+        // mailto supports url-encoded subject/body
+        string eTo = Uri.EscapeDataString(to ?? "");
+        string eSub = Uri.EscapeDataString(subject ?? "");
+        string eBody = Uri.EscapeDataString(body ?? "");
+
+        // Note: some clients have length limits; keep email reasonably short.
+        return $"mailto:{eTo}?subject={eSub}&body={eBody}";
+    }
+}

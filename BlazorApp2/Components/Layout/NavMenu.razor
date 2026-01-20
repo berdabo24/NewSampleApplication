@@ -1,0 +1,60 @@
+﻿<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">No Sleep</a>
+    </div>
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="nav flex-column">
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="nav-icon bi bi-house-door-fill-nav-menu" aria-hidden="true"></span>
+                <span class="nav-text">Home</span>
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="weather">
+                <span class="nav-icon bi bi-list-nested-nav-menu" aria-hidden="true"></span>
+                <span class="nav-text">Weather</span>
+            </NavLink>
+        </div>
+
+        <div class="nav-section px-3 mt-3 mb-1">
+            <small class="text-uppercase">AI Tools</small>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="ai">
+                <span class="nav-icon bi bi-chat-dots-fill-nav-menu" aria-hidden="true"></span>
+                <span class="nav-text">AI Chat</span>
+            </NavLink>
+        </div>
+
+        <!-- Goal Counter: no icon, but keep alignment using empty placeholder -->
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="counter">
+                <span class="nav-icon" aria-hidden="true"></span>
+                <span class="nav-text">Goal Counter</span>
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="calendar-agent">
+                <span class="nav-icon bi bi-calendar-event-fill-nav-menu" aria-hidden="true"></span>
+                <span class="nav-text">Schedule Assistant</span>
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="email-agent">
+                <span class="nav-icon bi bi-envelope-fill-nav-menu" aria-hidden="true"></span>
+                <span class="nav-text">Email Assistant</span>
+            </NavLink>
+        </div>
+
+    </nav>
+</div>
