@@ -11,9 +11,37 @@ public class AiService
 
     public AiService(IConfiguration config)
     {
-        // 1. Load the list of providers from appsettings
-        _providers = config.GetSection("AiProviders").Get<List<AiProviderConfig>>()
-                     ?? throw new Exception("Missing 'AiProviders' in appsettings.json");
+        _providers = new List<AiProviderConfig>();
+
+        // --- METHOD: CHECK FOR INDIVIDUAL ENV VARIABLES (Render) ---
+        // We assume 5 slots. You can add more if needed.
+        for (int i = 1; i <= 5; i++)
+        {
+            var key = Environment.GetEnvironmentVariable($"GROQ_KEY_{i}");
+            if (!string.IsNullOrEmpty(key))
+            {
+                _providers.Add(new AiProviderConfig
+                {
+                    Name = $"Groq-Env-{i}",
+                    BaseUrl = "https://api.groq.com/openai/v1/",
+                    ApiKey = key,
+                    Model = "llama-3.1-8b-instant"
+                });
+            }
+        }
+
+        // --- FALLBACK: IF NO ENV VARS FOUND, TRY APPSETTINGS (Local Dev) ---
+        if (_providers.Count == 0)
+        {
+            _providers = config.GetSection("AiProviders").Get<List<AiProviderConfig>>()
+                         ?? new List<AiProviderConfig>();
+        }
+
+        // Final Safety Check
+        if (_providers.Count == 0)
+        {
+            throw new Exception("No AI Providers found! Check .env variables or appsettings.json.");
+        }
     }
 
     public async Task<string> AskAsync(string prompt)

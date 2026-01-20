@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "FwCm0lr6p9c=",
+  "dgSpecHash": "O0Yubz+KIek=",
   "success": true,
-  "projectFilePath": "C:\\Users\\Julian\\Downloads\\MicrosoftAgent-BlazorUI-SampleApplication-main\\MicrosoftAgent-BlazorUI-SampleApplication-main\\BlazorApp2\\BlazorApp2.csproj",
+  "projectFilePath": "C:\\Users\\Julian\\Desktop\\NewSampleApp\\NewSampleApplication\\BlazorApp2\\BlazorApp2.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Julian\\.nuget\\packages\\azure.ai.openai\\2.5.0-beta.1\\azure.ai.openai.2.5.0-beta.1.nupkg.sha512",
     "C:\\Users\\Julian\\.nuget\\packages\\azure.core\\1.49.0\\azure.core.1.49.0.nupkg.sha512",

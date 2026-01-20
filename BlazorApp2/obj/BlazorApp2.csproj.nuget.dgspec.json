@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Julian\\Downloads\\MicrosoftAgent-BlazorUI-SampleApplication-main\\MicrosoftAgent-BlazorUI-SampleApplication-main\\BlazorApp2\\BlazorApp2.csproj": {}
+    "C:\\Users\\Julian\\Desktop\\NewSampleApp\\NewSampleApplication\\BlazorApp2\\BlazorApp2.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Julian\\Downloads\\MicrosoftAgent-BlazorUI-SampleApplication-main\\MicrosoftAgent-BlazorUI-SampleApplication-main\\BlazorApp2\\BlazorApp2.csproj": {
+    "C:\\Users\\Julian\\Desktop\\NewSampleApp\\NewSampleApplication\\BlazorApp2\\BlazorApp2.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Julian\\Downloads\\MicrosoftAgent-BlazorUI-SampleApplication-main\\MicrosoftAgent-BlazorUI-SampleApplication-main\\BlazorApp2\\BlazorApp2.csproj",
+        "projectUniqueName": "C:\\Users\\Julian\\Desktop\\NewSampleApp\\NewSampleApplication\\BlazorApp2\\BlazorApp2.csproj",
         "projectName": "BlazorApp2",
-        "projectPath": "C:\\Users\\Julian\\Downloads\\MicrosoftAgent-BlazorUI-SampleApplication-main\\MicrosoftAgent-BlazorUI-SampleApplication-main\\BlazorApp2\\BlazorApp2.csproj",
+        "projectPath": "C:\\Users\\Julian\\Desktop\\NewSampleApp\\NewSampleApplication\\BlazorApp2\\BlazorApp2.csproj",
         "packagesPath": "C:\\Users\\Julian\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Julian\\Downloads\\MicrosoftAgent-BlazorUI-SampleApplication-main\\MicrosoftAgent-BlazorUI-SampleApplication-main\\BlazorApp2\\obj\\",
+        "outputPath": "C:\\Users\\Julian\\Desktop\\NewSampleApp\\NewSampleApplication\\BlazorApp2\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
