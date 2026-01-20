@@ -1,4 +1,4 @@
-﻿@page "/calendar-agent"
+@page "/calendar-agent"
 @using System.Globalization
 @using System.Text.RegularExpressions
 @inject BlazorApp2.Services.AiService Ai
@@ -14,7 +14,7 @@
 <div class="mb-3">
     <label class="form-label">Preferred date range (optional)</label>
     <input class="form-control" @bind="DateRange"
-           placeholder="E.g., 16–20 Dec, afternoon" />
+           placeholder="E.g., 16–20 Dec 2026, afternoon" />
 </div>
 
 <button class="btn btn-primary" @onclick="GenerateOptions" disabled="@IsBusy">
@@ -77,6 +77,10 @@
         AiRaw = "";
         Options.Clear();
 
+        // 1. Get the current time so the AI knows "Today"
+        var now = DateTime.Now;
+        var currentContext = $"Today is {now:dddd, MMMM dd, yyyy} (Time: {now:HH:mm}). Current Year is {now.Year}.";
+
         // Agentic prompt: always propose 3 options.
         // If user gave exact date/time, Option 1 should match it; Options 2/3 are reasonable alternatives.
         var prompt = $@"
@@ -88,6 +92,9 @@ Task:
 - If time is not provided, suggest 3 realistic time slots.
 - Keep all options within the user's preferred date range if provided.
 - Use local time.
+- Return ONLY plain text. DO NOT use Markdown bolding (**), italics, or code blocks.
+- DO NOT add conversational filler like 'Here are the options'.
+- If the user does not specify a year, MUST assume the year is {now.Year}.
 
 Return ONLY in this exact format (labels and order must match):
 
@@ -138,58 +145,72 @@ Preferred date range (optional): {DateRange}
     {
         var results = new List<EventOption>();
 
-        // Split into blocks starting with "Option 1", "Option 2", "Option 3"
-        var blocks = Regex.Split(text.Trim(), @"(?im)^\s*(Option\s+[123])\s*$")
+        // 1. Normalize the text to remove Markdown bolding/headers so Regex can find "Option 1"
+        // This turns "**Option 1**" or "## Option 1" into just "Option 1"
+        var cleanText = Regex.Replace(text, @"[*#]", "");
+
+        // 2. Split using a Regex that looks for "Option 1", "Option 2", etc.
+        // We use "Split" to break the text into chunks.
+        var pattern = @"(?im)^\s*(Option\s+[123])[:.]?\s*$";
+        var blocks = Regex.Split(cleanText, pattern)
                           .Where(s => !string.IsNullOrWhiteSpace(s))
                           .ToList();
 
-        // After split, format is typically: [ "Option 1", "block1", "Option 2", "block2", ... ]
-        for (int i = 0; i + 1 < blocks.Count; i += 2)
+        // 3. Robust Loop: Don't assume index 0 is "Option 1".
+        // We scan the list. If we find "Option X", the NEXT item is the body.
+        for (int i = 0; i < blocks.Count - 1; i++)
         {
-            var label = blocks[i].Trim();
-            var body = blocks[i + 1];
+            var potentialLabel = blocks[i].Trim();
 
-            var title = ExtractLine(body, "Title:");
-            var startStr = ExtractLine(body, "Start (local):");
-            var endStr = ExtractLine(body, "End (local):");
-            var location = ExtractLine(body, "Location:");
-            var desc = ExtractLine(body, "Description:");
-
-            if (string.IsNullOrWhiteSpace(title) ||
-                string.IsNullOrWhiteSpace(startStr) ||
-                string.IsNullOrWhiteSpace(endStr))
-                continue;
-
-            if (!DateTime.TryParseExact(startStr.Trim(), "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture,
-                    DateTimeStyles.None, out var startLocal))
-                continue;
-
-            if (!DateTime.TryParseExact(endStr.Trim(), "yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture,
-                    DateTimeStyles.None, out var endLocal))
-                continue;
-
-            if (endLocal <= startLocal)
-                endLocal = startLocal.AddHours(1);
-
-            results.Add(new EventOption
+            // Check if this block is actually a label (e.g., "Option 1")
+            if (Regex.IsMatch(potentialLabel, @"^Option\s+[123]$", RegexOptions.IgnoreCase))
             {
-                Label = label,
-                Title = title.Trim(),
-                StartLocal = startLocal,
-                EndLocal = endLocal,
-                Location = (location ?? "").Trim(),
-                Description = (desc ?? "").Trim()
-            });
+                var body = blocks[i + 1]; // The text following the label
+
+                var title = ExtractLine(body, "Title:");
+                var startStr = ExtractLine(body, "Start (local):");
+                var endStr = ExtractLine(body, "End (local):");
+                var location = ExtractLine(body, "Location:");
+                var desc = ExtractLine(body, "Description:");
+
+                if (string.IsNullOrWhiteSpace(title) || string.IsNullOrWhiteSpace(startStr))
+                    continue;
+
+                // 4. Flexible Date Parsing (Fixes the exact format crash)
+                if (!DateTime.TryParse(startStr, CultureInfo.InvariantCulture, DateTimeStyles.None, out var startLocal))
+                    continue;
+
+                // Try parse end time, or default to 1 hour later
+                if (!DateTime.TryParse(endStr, CultureInfo.InvariantCulture, DateTimeStyles.None, out var endLocal))
+                    endLocal = startLocal.AddHours(1);
+
+                if (endLocal <= startLocal) endLocal = startLocal.AddHours(1);
+
+                results.Add(new EventOption
+                {
+                    Label = potentialLabel,
+                    Title = title.Trim(),
+                    StartLocal = startLocal,
+                    EndLocal = endLocal,
+                    Location = (location ?? "").Trim(),
+                    Description = (desc ?? "").Trim()
+                });
+
+                // Skip the body block in the next iteration
+                i++;
+            }
         }
 
-        // If AI returned weird formatting, at least return what we can
         return results;
     }
 
     private static string ExtractLine(string text, string label)
     {
-        var match = Regex.Match(text, @"(?im)^\s*" + Regex.Escape(label) + @"\s*(.+)$");
-        return match.Success ? match.Groups[1].Value : "";
+        // Matches "Title:", "**Title**:", "Title :", etc.
+        // The [*\s]* part ignores bolding asterisks and spaces around the label
+        var pattern = $@"(?im)^\s*[*]*{Regex.Escape(label).Replace(":", "")}[*]*[:]*\s*(.+)$";
+        var match = Regex.Match(text, pattern);
+        return match.Success ? match.Groups[1].Value.Trim() : "";
     }
 
     // ===== Google Calendar URL builder =====
