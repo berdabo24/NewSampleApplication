@@ -1,4 +1,4 @@
-﻿using OpenAI;
+using OpenAI;
 using Microsoft.Extensions.Configuration;
 using System.ClientModel;
 using OpenAI.Chat;
@@ -70,8 +70,8 @@ public class AiService
                 );
 
                 // If we get here, it worked! Return the text.
-                //return completion.Content[0].Text;
-                return $"[DEBUG: {provider.Name}] \n\n{completion.Content[0].Text}";
+                return completion.Content[0].Text;
+                //return $"[DEBUG: {provider.Name}] \n\n{completion.Content[0].Text}";
             }
             catch (Exception ex)
             {
