@@ -1,4 +1,4 @@
-﻿@page "/counter"
+@page "/counter"
 @using System.Text.RegularExpressions
 @inject BlazorApp2.Services.AiService Ai
 
@@ -91,17 +91,21 @@
         currentCount = 0;
 
         var prompt = $@"
-You are a goal-setting agent for a counter app.
+[SYSTEM]
+You are a logic engine for a counter app.
+From the user's goal, extract the numbers needed to track it.
 
-From the user's goal, decide a counter plan.
-Return ONLY in this exact format:
+[RULES]
+- Return ONLY plain text. NO Markdown (**).
+- Output must be in this EXACT format:
 
-Target: <integer>
-Step: <integer>
-Milestones (%): <comma-separated integers, e.g., 25,50,75,100>
-Message: <1 short motivational sentence>
+Target: <integer only>
+Step: <integer only>
+Milestones (%): <integers separated by commas>
+Message: <short encouraging phrase>
 
-User goal: {goalPrompt}
+[USER GOAL]
+{goalPrompt}
 ";
 
         planRaw = await Ai.AskAsync(prompt);
@@ -161,33 +165,52 @@ User goal: {goalPrompt}
 
     private static (int Target, int Step, int[] Milestones, string Message)? ParsePlan(string text)
     {
-        // Extract helper
+        // Helper: "Loose" matching that ignores Markdown bolding (**)
         static string Get(string label, string input)
         {
-            var m = Regex.Match(input, @"(?im)^\s*" + Regex.Escape(label) + @"\s*(.+)$");
+            // Pattern: Start of line -> optional * -> Label -> optional * -> optional : -> Value
+            var pattern = $@"(?im)^\s*[*]*{Regex.Escape(label)}[*]*[:]*\s*(.+)$";
+            var m = Regex.Match(input, pattern);
             return m.Success ? m.Groups[1].Value.Trim() : "";
         }
 
-        var targetStr = Get("Target:", text);
-        var stepStr = Get("Step:", text);
-        var mileStr = Get("Milestones (%):", text);
-        var msg = Get("Message:", text);
+        // Helper: Extract the first integer found in a string (e.g. "10 glasses" -> 10)
+        static int ParseInt(string input, int fallback = -1)
+        {
+            var match = Regex.Match(input, @"\d+");
+            return match.Success && int.TryParse(match.Value, out var val) ? val : fallback;
+        }
 
-        if (!int.TryParse(targetStr, out var t)) return null;
-        if (!int.TryParse(stepStr, out var s)) return null;
+        // 1. Extract Raw Strings
+        // Note: We search for "Target" without the colon, let regex handle the colon
+        var targetStr = Get("Target", text);
+        var stepStr = Get("Step", text);
+        var mileStr = Get("Milestones (%)", text); // Or just "Milestones"
+        if (string.IsNullOrEmpty(mileStr)) mileStr = Get("Milestones", text); // Fallback
+        var msg = Get("Message", text);
 
+        // 2. Parse Numbers (Robustly)
+        var t = ParseInt(targetStr);
+        var s = ParseInt(stepStr);
+
+        // If Target or Step are missing/invalid, fail gracefully
+        if (t <= 0 || s <= 0) return null;
+
+        // 3. Clamp logic
         t = Math.Clamp(t, 1, 100000);
         s = Math.Clamp(s, 1, 100000);
 
+        // 4. Parse Milestones
         var miles = mileStr
-            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-            .Select(x => int.TryParse(x, out var v) ? v : -1)
+            .Split(new[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries) // Split by comma OR space
+            .Select(x => ParseInt(x)) // Parse "25%" -> 25
             .Where(v => v >= 1 && v <= 100)
             .Distinct()
             .OrderBy(v => v)
             .ToArray();
 
-        if (string.IsNullOrWhiteSpace(msg)) msg = "Let’s make progress today.";
+        // 5. Default Message
+        if (string.IsNullOrWhiteSpace(msg)) msg = "Let’s go!";
 
         return (t, s, miles, msg);
     }
