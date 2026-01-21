@@ -1,4 +1,6 @@
-﻿@page "/"
+@page "/"
+@using BlazorApp2.Services
+@inject AiService Ai
 
 <PageTitle>Home</PageTitle>
 
@@ -70,3 +72,127 @@
         (tracking progress, opening Google Calendar event creation, opening email client to send).
     </div>
 </div>
+
+<div class="secret-trigger" @onclick="HandleSecretClick"></div>
+
+@if (showDiagnostics)
+{
+    <div class="api-status-card">
+        <div class="status-header">
+            <small>System Status</small>
+            <button class="btn btn-sm btn-close" @onclick="CloseDiagnostics"></button>
+        </div>
+
+        <div class="status-grid">
+            @if (isChecking)
+            {
+                <div class="text-center p-2 text-muted">
+                    <span class="spinner-border spinner-border-sm"></span> Checking...
+                </div>
+            }
+            else
+            {
+                @foreach (var status in AiService.ApiStatus.OrderBy(x => x.Key))
+                {
+                    <div class="status-item">
+                        <span>@status.Key.Replace("Groq-", "")</span>
+                        <span>@(status.Value ? "✅" : "❌")</span>
+                    </div>
+                }
+
+                <div class="mt-2 text-center">
+                    <button class="btn btn-sm btn-outline-primary py-0" style="font-size: 0.75rem" @onclick="RunManualCheck">
+                        Refresh Status
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+<style>
+    /* Invisible Hitbox */
+    .secret-trigger {
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        width: 80px;
+        height: 80px;
+        z-index: 9999;
+        cursor: default;
+    }
+
+    /* The Popup Panel */
+    .api-status-card {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: rgba(255, 255, 255, 0.98);
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 10px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        z-index: 10000;
+        font-family: monospace;
+        min-width: 160px;
+    }
+
+    .status-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 2px 0;
+        font-size: 0.85rem;
+        border-bottom: 1px solid #eee;
+    }
+
+    .status-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 5px;
+        margin-bottom: 8px;
+    }
+</style>
+
+@code {
+    // --- Secret Menu Logic ---
+    private int secretClickCount = 0;
+    private bool showDiagnostics = false;
+    private bool isChecking = false;
+
+    private async Task HandleSecretClick()
+    {
+        secretClickCount++;
+        // REQUIREMENT: 5 Consecutive Presses to unlock
+        if (secretClickCount >= 5)
+        {
+            showDiagnostics = true;
+            secretClickCount = 0; // Reset count
+            await RunManualCheck(); // Auto-check on open
+        }
+    }
+
+    private async Task RunManualCheck()
+    {
+        if (isChecking) return; // Prevent double-clicking
+
+        isChecking = true;
+        StateHasChanged();
+
+        // Artificial delay so you can see the spinner (optional UI polish)
+        await Task.Delay(300);
+
+        // Call the service
+        await Ai.CheckHealthAsync();
+
+        isChecking = false;
+    }
+
+    private void CloseDiagnostics()
+    {
+        showDiagnostics = false;
+        secretClickCount = 0;
+    }
+}
+
