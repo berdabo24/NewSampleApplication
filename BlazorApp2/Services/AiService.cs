@@ -2,6 +2,7 @@ using OpenAI;
 using Microsoft.Extensions.Configuration;
 using System.ClientModel;
 using OpenAI.Chat;
+using System.Collections.Concurrent;
 
 namespace BlazorApp2.Services;
 
@@ -87,4 +88,43 @@ public class AiService
         // 4. If ALL providers fail, throw an error or return a safe message
         return $"System Overloaded. Errors: {string.Join("; ", errorLogs)}";
     }
+
+    // --- NEW: Health Check Logic ---
+
+    // Thread-safe storage for status (Key: "Groq-1", Value: true/false)
+    public static ConcurrentDictionary<string, bool> ApiStatus = new();
+
+    public async Task CheckHealthAsync()
+    {
+        using var client = new HttpClient();
+        client.Timeout = TimeSpan.FromSeconds(3); // Fast timeout (3s)
+
+        foreach (var provider in _providers)
+        {
+            try
+            {
+                // We verify the API is alive by asking for its "Model List" (Metadata).
+                // This is much cheaper than generating text and usually doesn't count 
+                // toward your strict Generation RPM limits.
+
+                // Groq/OpenAI/OpenRouter standard endpoint: .../v1/models
+                var url = provider.BaseUrl.TrimEnd('/') + "/models";
+
+                var request = new HttpRequestMessage(HttpMethod.Get, url);
+                request.Headers.Add("Authorization", $"Bearer {provider.ApiKey}");
+
+                var response = await client.SendAsync(request);
+
+                // 200 OK means the Key is valid and API is up.
+                ApiStatus[provider.Name] = response.IsSuccessStatusCode;
+            }
+            catch
+            {
+                // Timeout or DNS error
+                ApiStatus[provider.Name] = false;
+            }
+        }
+    }
 }
+
+
